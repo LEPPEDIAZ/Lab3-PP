@@ -4,7 +4,7 @@
 #ifdef _OPENMP
  #include <omp.h>
 #endif
-
+int *iteration;
 double f(double x);    
 double Trap(double a, double b, int n, int thread_count);
 double TrapDynamic(double a, double b, int n, int thread_count);
@@ -15,8 +15,7 @@ int main(int argc, char* argv[]) {
    double  global_result2 = 0.0; 
    double  global_result3 = 0.0; 
    double  global_result4 = 0.0; 
-   CHUNKSIZE = 10
-
+   
    double  a, b;                 
    int     n;                    
    int     thread_count;
@@ -46,6 +45,15 @@ int main(int argc, char* argv[]) {
    printf("With n = %d trapezoids, our estimate (runtime)\n", n);
    printf("of the integral from %f to %f = %.14e\n",
       a, b, global_result4);
+
+   int loop;
+
+
+   for(loop = 0; loop < n; loop++)
+      printf("iteracion %d ", iteration[loop]);
+
+   return 0;
+   
    return 0;
 }  
 
@@ -65,12 +73,12 @@ double Trap(double a, double b, int n, int thread_count) {
    h = (b-a)/n; 
    approx = (f(a) + f(b))/2.0;
 
-   # pragma omp parallel for schedule(static) default(none) \
+   # pragma omp parallel for schedule(static,6) default(none) \
 	shared(a,h,n) private(i) reduction(+:approx) num_threads(thread_count)
    for (i = 1; i <= n-1; i++)
      approx += f(a + i*h);
+  //   iteration[i] = approx; 
    approx = h*approx; 
-
    double stop = omp_get_wtime();
    double time = stop - start;
    printf("Ellapsed Time is:%f\n", time);
@@ -86,15 +94,17 @@ double TrapDynamic(double a, double b, int n, int thread_count) {
    h = (b-a)/n; 
    approx = (f(a) + f(b))/2.0;
 
-   # pragma omp parallel for schedule(dynamic,4) default(none) \
+   # pragma omp parallel for schedule(dynamic,3) default(none) \
 	shared(a,h,n) private(i) reduction(+:approx) num_threads(thread_count)
    for (i = 1; i <= n-1; i++)
      approx += f(a + i*h);
+    // iteration[i] = approx; 
    approx = h*approx; 
 
    double stop = omp_get_wtime();
    double time = stop - start;
    printf("Ellapsed Time is Dynamic:%f\n", time);
+   
    return approx;
 }   
 double TrapGuided(double a, double b, int n, int thread_count) {
@@ -105,13 +115,16 @@ double TrapGuided(double a, double b, int n, int thread_count) {
    h = (b-a)/n; 
    approx = (f(a) + f(b))/2.0;
 
-   # pragma omp parallel for num_threads(thread_count) schedule(guided,10) \
-      reduction(+: approx)
-   for (i = 1; i <= n-1; i++){
+   # pragma omp parallel for schedule(guided,7) default(none) \
+	shared(a,h,n) private(i) reduction(+:approx) num_threads(thread_count)
+   for (i = 1; i <= n-1; i++)
      approx += f(a + i*h);
-     iteracion[i] = omp_get_thread_num(); }
+    // iteration[i] = approx; 
    approx = h*approx; 
 
+   double stop = omp_get_wtime();
+   double time = stop - start;
+   printf("Ellapsed Time is Dynamic:%f\n", time);
    return approx;
 }   
 double TrapRunTime(double a, double b, int n, int thread_count) {
@@ -122,7 +135,7 @@ double TrapRunTime(double a, double b, int n, int thread_count) {
    h = (b-a)/n; 
    approx = (f(a) + f(b))/2.0;
 
-   # pragma omp parallel for schedule(runtime,46) default(none) \
+   # pragma omp parallel for schedule(runtime) default(none) \
 	shared(a,h,n) private(i) reduction(+:approx) num_threads(thread_count)
    for (i = 1; i <= n-1; i++)
      approx += f(a + i*h);
