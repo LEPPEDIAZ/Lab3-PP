@@ -12,9 +12,9 @@ double TrapGuided(double a, double b, int n, int thread_count);
 double TrapRunTime(double a, double b, int n, int thread_count);
 int main(int argc, char* argv[]) {
    double  global_result = 0.0; 
-   double  global_result2 = 2.021734; 
-   double  global_result3 = 2.051; 
-   double  global_result4 = 3.020698; 
+   double  global_result2 = 0.0; 
+   double  global_result3 = 0.0; 
+   double  global_result4 = 0.0; 
    
    double  a, b;                 
    int     n;                    
