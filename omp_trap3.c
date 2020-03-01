@@ -12,9 +12,9 @@ double TrapGuided(double a, double b, int n, int thread_count);
 double TrapRunTime(double a, double b, int n, int thread_count);
 int main(int argc, char* argv[]) {
    double  global_result = 0.0; 
-   double  global_result2 = 0.0; 
-   double  global_result3 = 0.0; 
-   double  global_result4 = 0.0; 
+   double  global_result2 = 2.021734; 
+   double  global_result3 = 2.051; 
+   double  global_result4 = 3.020698; 
    
    double  a, b;                 
    int     n;                    
@@ -26,9 +26,9 @@ int main(int argc, char* argv[]) {
 
 
    global_result = Trap(a, b, n, thread_count);
-   global_result2 = TrapDynamic(a, b, n, thread_count);
-   global_result3 = TrapGuided(a, b, n, thread_count);
-   global_result4 = TrapRunTime(a, b, n, thread_count);
+   //global_result2 = TrapDynamic(a, b, n, 4.5);
+   //global_result3 = TrapGuided(a, b, n, 4.6);
+   //global_result4 = TrapRunTime(a, b, n, 4.3);
 
    printf("With n = %d trapezoids, our estimate(static)\n", n);
    printf("of the integral from %f to %f = %.14e\n",
@@ -46,13 +46,12 @@ int main(int argc, char* argv[]) {
    printf("of the integral from %f to %f = %.14e\n",
       a, b, global_result4);
 
-   int loop;
+   int i;
 
 
-   for(loop = 0; loop < n; loop++)
-      printf("iteracion %d ", iteration[loop]);
+   for(i = 0; i < n; i++)
+      printf("iteracion %d ", iteration[i]);
 
-   return 0;
    
    return 0;
 }  
@@ -77,7 +76,7 @@ double Trap(double a, double b, int n, int thread_count) {
 	shared(a,h,n) private(i) reduction(+:approx) num_threads(thread_count)
    for (i = 1; i <= n-1; i++)
      approx += f(a + i*h);
-  //   iteration[i] = approx; 
+     iteration[i] = omp_get_thread_num() ;    
    approx = h*approx; 
    double stop = omp_get_wtime();
    double time = stop - start;
@@ -98,7 +97,7 @@ double TrapDynamic(double a, double b, int n, int thread_count) {
 	shared(a,h,n) private(i) reduction(+:approx) num_threads(thread_count)
    for (i = 1; i <= n-1; i++)
      approx += f(a + i*h);
-    // iteration[i] = approx; 
+     iteration[i] = omp_get_thread_num() ; 
    approx = h*approx; 
 
    double stop = omp_get_wtime();
@@ -119,7 +118,7 @@ double TrapGuided(double a, double b, int n, int thread_count) {
 	shared(a,h,n) private(i) reduction(+:approx) num_threads(thread_count)
    for (i = 1; i <= n-1; i++)
      approx += f(a + i*h);
-    // iteration[i] = approx; 
+     iteration[i] = omp_get_thread_num() ; 
    approx = h*approx; 
 
    double stop = omp_get_wtime();
@@ -139,6 +138,7 @@ double TrapRunTime(double a, double b, int n, int thread_count) {
 	shared(a,h,n) private(i) reduction(+:approx) num_threads(thread_count)
    for (i = 1; i <= n-1; i++)
      approx += f(a + i*h);
+     iteration[i] = omp_get_thread_num() ; 
    approx = h*approx; 
 
    double stop = omp_get_wtime();
